@@ -126,6 +126,11 @@ int PrepareMqttPayload(char * PayloadBuffer, int PayloadSize)
     Led_Off();
   }
   
+  /* TODO: get sensor values, relevant functions are:
+   *   SensorGetHumidity(), SensorGetPressure(), SensorGetTemperature()
+   *   SensorGetAcceleration(), SensorGetGyro(), SensorGetMagneto()
+   */
+  
   snprintf( Buff, BuffSize, "{\"d\":{\"deviceId\":\"%s\","
            "\"toggle\": %d,"
 // TODO: add data here
