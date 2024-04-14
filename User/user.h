@@ -57,7 +57,7 @@ typedef enum {
 /* Exported functions ------------------------------------------------------- */
 int userInit(void);
 void userTask(void);
-ButtonPush_t Button_WaitForPush(uint32_t timeout);
+ButtonPush_t Button_CheckForPush();
 int PrepareMqttPayload(char * PayloadBuffer, int PayloadSize);
 
 

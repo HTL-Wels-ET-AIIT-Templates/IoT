@@ -118,7 +118,6 @@ int connectiotf(void)
 
 /**
  * Function used to publish the given data to the topic with the given QoS
- * @Param client - Address of MQTT Client
  * @Param topic - Topic to publish
  * @Param payload - Message payload
  *
@@ -129,9 +128,6 @@ int publishData(char *topic, char *payload){
 	MQTTMessage pub;
 
 	pub.qos=QOS0;
-	//       if (qos==0) pub.qos=QOS0;
-	//       if (qos==1) pub.qos=QOS1;
-	//       if (qos==2) pub.qos=QOS2;
 
 	pub.retained = '0';
 	pub.payload = payload;

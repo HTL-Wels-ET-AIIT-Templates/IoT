@@ -23,6 +23,7 @@
 
 // local Variables ------------------------------------------------------------------
 static volatile uint8_t buttonFlags = 0;
+static volatile uint32_t buttonTime = 0;
 static char  PayloadBuffer[PAYLOADSIZE];
 
 // Function Declarations ------------------------------------------------------
@@ -56,7 +57,7 @@ void userTask(void){
 	ButtonPush_t command;
 	bool bSinglePublish = false;
 
-	command = Button_WaitForPush(10);
+	command = Button_CheckForPush();
 	if (command == BP_SINGLE_PUSH) {      /* If short button push, publish once. */
 		bSinglePublish = true;
 	}
@@ -79,22 +80,24 @@ void userTask(void){
 void Button_ISR(void)
 {
 	static uint32_t filterDelay = 0;
+	// filter bouncing: accept push only every 100ms
 	if (HAL_GetTick() > filterDelay) {
+		if (buttonFlags == 0) {
+			buttonTime = HAL_GetTick();
+		}
 		buttonFlags++;
-		filterDelay = HAL_GetTick() + 20;
+		filterDelay = HAL_GetTick() + 100;
 	}
 }
 
 /**
  * @brief Check for button to be pushed
- * @param delay Time in ms to wait for button event
  * @retval either BP_NOT_PUSHED, BP_SINGLE_PUSH or BP_MULTIPLE_PUSH
  */
-ButtonPush_t Button_WaitForPush(uint32_t delay)
+ButtonPush_t Button_CheckForPush(void)
 {
-	uint32_t time_out = HAL_GetTick() + delay;
-	do
-	{
+	if (HAL_GetTick() - buttonTime > 300) {
+		//  wait 300ms after button press, before evaluating single/double push
 		if (buttonFlags >= 2) {
 			buttonFlags = 0;
 			return BP_MULTIPLE_PUSH;
@@ -103,7 +106,6 @@ ButtonPush_t Button_WaitForPush(uint32_t delay)
 			return BP_SINGLE_PUSH;
 		}
 	}
-	while( HAL_GetTick() < time_out);
 	return BP_NOT_PUSHED;
 }
 
@@ -120,10 +122,11 @@ int PrepareMqttPayload(char * PayloadBuffer, int PayloadSize)
 	int snprintfreturn = 0;
 
 	toggle = toggle ^ 0x01;
-	if (toggle)
+	if (toggle) {
 		Led_On();
-	else
+	} else {
 		Led_Off();
+	}
 
 	/* TODO: get sensor values, relevant functions are:
 	 *   SensorGetHumidity(), SensorGetPressure(), SensorGetTemperature()
