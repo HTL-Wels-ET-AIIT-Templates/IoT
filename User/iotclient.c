@@ -151,8 +151,10 @@ int publishData(char *topic, char *payload){
 int yield(int time_ms)
 {
 	int rc = 0;
-	rc = MQTTYield(&iotDevice.deviceClient.c, time_ms);
 
+	if (isConnected()) {
+		rc = MQTTYield(&iotDevice.deviceClient.c, time_ms);
+	}
 	return rc;
 }
 
